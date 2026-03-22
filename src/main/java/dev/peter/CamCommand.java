@@ -159,21 +159,15 @@ public class CamCommand {
                                 return 1;
                             })
                     )
-                    .then(literal("clear")
-                            .executes(context -> {
-                                CamControl.clearKeyframes();
-                                CamControl.sync(context.getSource().getServer());
-                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Session keyframes cleared.").formatted(Formatting.YELLOW), true);
-                                return 1;
-                            })
-                    )
                     .then(literal("remove")
                             .then(argument("name", StringArgumentType.string())
                                     .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
                                         String name = StringArgumentType.getString(context, "name");
                                         CinematicStorage.delete(context.getSource().getServer(), name);
-                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic: ").formatted(Formatting.RED)
+                                        CamControl.clearKeyframes();
+                                        CamControl.sync(context.getSource().getServer());
+                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic and cleared session: ").formatted(Formatting.RED)
                                                 .append(Text.literal(name).formatted(Formatting.GOLD)), true);
                                         return 1;
                                     })
