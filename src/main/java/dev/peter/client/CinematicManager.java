@@ -10,8 +10,17 @@ public class CinematicManager {
     private static List<Keyframe> currentPath = null;
     private static List<Keyframe> editPath = null;
     private static boolean active = false;
+    private static boolean isometric = false;
     private static long startTime = 0;
     private static float totalDuration = 0;
+
+    public static void setIsometric(boolean value) {
+        isometric = value;
+    }
+
+    public static boolean isIsometric() {
+        return isometric;
+    }
 
     public static void setEditPath(List<Keyframe> path) {
         editPath = path;
@@ -75,10 +84,10 @@ public class CinematicManager {
         Keyframe p0 = index > 0 ? currentPath.get(index - 1) : p1;
         Keyframe p3 = index < currentPath.size() - 2 ? currentPath.get(index + 2) : p2;
 
-        Vec3d v0 = p0.getPos();
-        Vec3d v1 = p1.getPos();
-        Vec3d v2 = p2.getPos();
-        Vec3d v3 = p3.getPos();
+        Vec3d v0 = getTruePos(p0);
+        Vec3d v1 = getTruePos(p1);
+        Vec3d v2 = getTruePos(p2);
+        Vec3d v3 = getTruePos(p3);
 
         double x = catmullRom(v0.x, v1.x, v2.x, v3.x, alpha);
         double y = catmullRom(v0.y, v1.y, v2.y, v3.y, alpha);
@@ -87,7 +96,50 @@ public class CinematicManager {
         float yaw = lerpAngle(p1.yaw(), p2.yaw(), alpha);
         float pitch = lerpAngle(p1.pitch(), p2.pitch(), alpha);
 
+        float shakeI = lerp(p1.shakeIntensity(), p2.shakeIntensity(), alpha);
+        float shakeS = lerp(p1.shakeSpeed(), p2.shakeSpeed(), alpha);
+
+        if (shakeI > 0) {
+            double time = System.currentTimeMillis() / 1000.0 * shakeS;
+            x += Math.sin(time) * shakeI * 0.1;
+            y += Math.cos(time * 1.2) * shakeI * 0.1;
+            z += Math.sin(time * 0.7) * shakeI * 0.1;
+        }
+
+        if (p1.targetEntityId() != -1) {
+            var client = net.minecraft.client.MinecraftClient.getInstance();
+            if (client.world != null) {
+                var target = client.world.getEntityById(p1.targetEntityId());
+                if (target != null) {
+                    Vec3d targetPos = target.getLerpedPos(alpha);
+                    double dx = targetPos.x - x;
+                    double dy = targetPos.y - y;
+                    double dz = targetPos.z - z;
+                    double dh = Math.sqrt(dx * dx + dz * dz);
+                    yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                    pitch = (float) -Math.toDegrees(Math.atan2(dy, dh));
+                }
+            }
+        }
+
         return new CinematicState(x, y, z, yaw, pitch);
+    }
+
+    private static Vec3d getTruePos(Keyframe k) {
+        if (k.targetEntityId() != -1 && k.orbital()) {
+            var client = net.minecraft.client.MinecraftClient.getInstance();
+            if (client.world != null) {
+                var target = client.world.getEntityById(k.targetEntityId());
+                if (target != null) {
+                    return target.getPos().add(k.x(), k.y(), k.z());
+                }
+            }
+        }
+        return k.getPos();
+    }
+
+    private static float lerp(float a, float b, float t) {
+        return a + (b - a) * t;
     }
 
     private static double catmullRom(double p0, double p1, double p2, double p3, float t) {

@@ -2,6 +2,7 @@ package dev.peter;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.peter.network.SetModePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.util.CinematicStorage;
@@ -14,6 +15,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,26 +30,85 @@ public class CamCommand {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("cam")
                     .requires(source -> source.hasPermissionLevel(2))
+                    .then(literal("mode")
+                            .then(literal("isometric")
+                                    .then(argument("enabled", BoolArgumentType.bool())
+                                            .executes(context -> {
+                                                boolean enabled = BoolArgumentType.getBool(context, "enabled");
+                                                SetModePayload payload = new SetModePayload(enabled);
+                                                for (ServerPlayerEntity player : context.getSource().getServer().getPlayerManager().getPlayerList()) {
+                                                    ServerPlayNetworking.send(player, payload);
+                                                }
+                                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Isometric mode set to: " + enabled).formatted(Formatting.GREEN), true);
+                                                return 1;
+                                            })
+                                    )
+                            )
+                    )
                     .then(literal("add")
                             .then(argument("duration", FloatArgumentType.floatArg(0.1f))
                                     .executes(context -> {
                                         ServerPlayerEntity player = context.getSource().getPlayer();
                                         if (player == null) return 0;
                                         float duration = FloatArgumentType.getFloat(context, "duration");
-                                        CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), duration);
+                                        CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), duration, 0, 0, -1, false);
                                         CamControl.sync(context.getSource().getServer());
-                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added at current position with duration: " + duration + "s")
-                                                .formatted(Formatting.AQUA), true);
+                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added (Duration: " + duration + "s)").formatted(Formatting.AQUA), true);
                                         return 1;
                                     })
+                                    .then(argument("shake", FloatArgumentType.floatArg(0))
+                                            .then(argument("speed", FloatArgumentType.floatArg(0))
+                                                    .executes(context -> {
+                                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                                        if (player == null) return 0;
+                                                        float duration = FloatArgumentType.getFloat(context, "duration");
+                                                        float shake = FloatArgumentType.getFloat(context, "shake");
+                                                        float speed = FloatArgumentType.getFloat(context, "speed");
+                                                        CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), duration, shake, speed, -1, false);
+                                                        CamControl.sync(context.getSource().getServer());
+                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added with Shake: " + shake).formatted(Formatting.AQUA), true);
+                                                        return 1;
+                                                    })
+                                            )
+                                    )
+                                    .then(literal("lookat")
+                                            .then(argument("target", EntityArgumentType.entity())
+                                                    .executes(context -> {
+                                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                                        if (player == null) return 0;
+                                                        float duration = FloatArgumentType.getFloat(context, "duration");
+                                                        var target = EntityArgumentType.getEntity(context, "target");
+                                                        CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), duration, 0, 0, target.getId(), false);
+                                                        CamControl.sync(context.getSource().getServer());
+                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added tracking entity: " + target.getName().getString()).formatted(Formatting.AQUA), true);
+                                                        return 1;
+                                                    })
+                                            )
+                                    )
+                                    .then(literal("orbital")
+                                            .then(argument("target", EntityArgumentType.entity())
+                                                    .executes(context -> {
+                                                        ServerPlayerEntity player = context.getSource().getPlayer();
+                                                        if (player == null) return 0;
+                                                        float duration = FloatArgumentType.getFloat(context, "duration");
+                                                        var target = EntityArgumentType.getEntity(context, "target");
+                                                        double ox = player.getX() - target.getX();
+                                                        double oy = player.getEyeY() - target.getY();
+                                                        double oz = player.getZ() - target.getZ();
+                                                        CamControl.addKeyframe(ox, oy, oz, player.getYaw(), player.getPitch(), duration, 0, 0, target.getId(), true);
+                                                        CamControl.sync(context.getSource().getServer());
+                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Orbital keyframe added around: " + target.getName().getString()).formatted(Formatting.AQUA), true);
+                                                        return 1;
+                                                    })
+                                            )
+                                    )
                             )
                             .executes(context -> {
                                 ServerPlayerEntity player = context.getSource().getPlayer();
                                 if (player == null) return 0;
-                                CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), 5.0f);
+                                CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), 5.0f, 0, 0, -1, false);
                                 CamControl.sync(context.getSource().getServer());
-                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added at current position (Default duration: 5s)")
-                                        .formatted(Formatting.AQUA), true);
+                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added (Default duration: 5s)").formatted(Formatting.AQUA), true);
                                 return 1;
                             })
                     )

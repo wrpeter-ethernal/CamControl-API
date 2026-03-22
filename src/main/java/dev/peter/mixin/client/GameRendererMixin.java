@@ -36,7 +36,11 @@ public class GameRendererMixin {
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
     private void lockFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
         if (CinematicManager.isActive()) {
-            cir.setReturnValue((double) this.client.options.getFov().getValue());
+            if (CinematicManager.isIsometric()) {
+                cir.setReturnValue(4.0);
+            } else {
+                cir.setReturnValue((double) this.client.options.getFov().getValue());
+            }
         }
     }
 }
