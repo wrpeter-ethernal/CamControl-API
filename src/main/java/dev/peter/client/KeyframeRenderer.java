@@ -39,7 +39,7 @@ public class KeyframeRenderer {
             matrices.push();
             matrices.translate(k.x(), k.y(), k.z());
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - k.yaw()));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(k.pitch()));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-k.pitch()));
 
             renderCameraIndicator(buffer, matrices.peek().getPositionMatrix(), i == 0);
 

@@ -99,33 +99,14 @@ public class CamCommand {
                             })
                     )
                     .then(literal("remove")
-                            .then(argument("name_or_index", StringArgumentType.string())
-                                    .suggests((context, builder) -> {
-                                        var saved = CinematicStorage.getAll(context.getSource().getServer()).keySet();
-                                        CommandSource.suggestMatching(saved, builder);
-                                        int count = CamControl.getKeyframes().size();
-                                        for (int i = 0; i < count; i++) builder.suggest(String.valueOf(i));
-                                        return builder.buildFuture();
-                                    })
+                            .then(argument("name", StringArgumentType.string())
+                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
-                                        String arg = StringArgumentType.getString(context, "name_or_index");
-                                        try {
-                                            int index = Integer.parseInt(arg);
-                                            var list = CamControl.getKeyframes();
-                                            if (index >= list.size() || index < 0) {
-                                                context.getSource().sendError(Text.literal("[CamControl] Error: Index " + index + " out of bounds."));
-                                                return 0;
-                                            }
-                                            CamControl.removeKeyframe(index);
-                                            CamControl.sync(context.getSource().getServer());
-                                            context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed session keyframe #" + index).formatted(Formatting.YELLOW), true);
-                                            return 1;
-                                        } catch (NumberFormatException e) {
-                                            CinematicStorage.delete(context.getSource().getServer(), arg);
-                                            context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic: ").formatted(Formatting.RED)
-                                                    .append(Text.literal(arg).formatted(Formatting.GOLD)), true);
-                                            return 1;
-                                        }
+                                        String name = StringArgumentType.getString(context, "name");
+                                        CinematicStorage.delete(context.getSource().getServer(), name);
+                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic: ").formatted(Formatting.RED)
+                                                .append(Text.literal(name).formatted(Formatting.GOLD)), true);
+                                        return 1;
                                     })
                             )
                     )
