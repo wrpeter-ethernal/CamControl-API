@@ -1,7 +1,6 @@
 package dev.peter;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
@@ -13,16 +12,12 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -71,30 +66,10 @@ public class CamCommand {
                                     })
                             )
                     )
-                    .then(literal("delete")
-                            .then(argument("name", StringArgumentType.string())
-                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
-                                    .executes(context -> {
-                                        String name = StringArgumentType.getString(context, "name");
-                                        CinematicStorage.delete(context.getSource().getServer(), name);
-                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Deleted cinematic: ").formatted(Formatting.RED)
-                                                .append(Text.literal(name).formatted(Formatting.GOLD)), true);
-                                        return 1;
-                                    })
-                            )
-                    )
-                    .then(literal("clear")
-                            .executes(context -> {
-                                CamControl.clearKeyframes();
-                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] All session keyframes cleared.")
-                                        .formatted(Formatting.YELLOW), true);
-                                return 1;
-                            })
-                    )
                     .then(literal("list")
                             .executes(context -> {
                                 var current = CamControl.getKeyframes();
-                                Map<String, List<Keyframe>> saved = CinematicStorage.getAll(context.getSource().getServer());
+                                var saved = CinematicStorage.getAll(context.getSource().getServer());
 
                                 if (current.isEmpty() && saved.isEmpty()) {
                                     context.getSource().sendFeedback(() -> Text.literal("[CamControl] No keyframes or saved cinematics found."), false);
@@ -112,31 +87,23 @@ public class CamCommand {
 
                                 if (!saved.isEmpty()) {
                                     context.getSource().sendFeedback(() -> Text.literal(" "), false);
-                                    context.getSource().sendFeedback(() -> Text.literal("[CamControl] Saved Cinematics (Click to Play):").formatted(Formatting.GOLD), false);
+                                    context.getSource().sendFeedback(() -> Text.literal("[CamControl] Saved Cinematics:").formatted(Formatting.GOLD), false);
                                     for (String name : saved.keySet()) {
                                         int count = saved.get(name).size();
-                                        MutableText text = Text.literal("- " + name + " (" + count + " points)")
-                                                .formatted(Formatting.YELLOW)
-                                                .styled(style -> style
-                                                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cam play " + name))
-                                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to play cinematic: " + name))));
-                                        context.getSource().sendFeedback(() -> text, false);
+                                        context.getSource().sendFeedback(() -> Text.literal("- " + name + " (" + count + " points)").formatted(Formatting.YELLOW), false);
                                     }
                                 }
                                 return 1;
                             })
                     )
                     .then(literal("remove")
-                            .then(argument("index", IntegerArgumentType.integer(0))
+                            .then(argument("name", StringArgumentType.string())
+                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
-                                        int index = IntegerArgumentType.getInteger(context, "index");
-                                        var list = CamControl.getKeyframes();
-                                        if (index >= list.size()) {
-                                            context.getSource().sendError(Text.literal("[CamControl] Error: Index " + index + " out of bounds."));
-                                            return 0;
-                                        }
-                                        CamControl.removeKeyframe(index);
-                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed keyframe #" + index).formatted(Formatting.YELLOW), true);
+                                        String name = StringArgumentType.getString(context, "name");
+                                        CinematicStorage.delete(context.getSource().getServer(), name);
+                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic: ").formatted(Formatting.RED)
+                                                .append(Text.literal(name).formatted(Formatting.GOLD)), true);
                                         return 1;
                                     })
                             )
