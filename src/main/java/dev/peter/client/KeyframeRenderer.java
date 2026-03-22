@@ -38,7 +38,7 @@ public class KeyframeRenderer {
             Keyframe k = path.get(i);
             matrices.push();
             matrices.translate(k.x(), k.y(), k.z());
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-k.yaw() + 180));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - k.yaw()));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(k.pitch()));
 
             renderCameraIndicator(buffer, matrices.peek().getPositionMatrix(), i == 0);
@@ -100,6 +100,9 @@ public class KeyframeRenderer {
         line(buffer, matrix, 0, 0, 0, w, -h, -d, r, g, b);
         line(buffer, matrix, 0, 0, 0, w, h, -d, r, g, b);
         line(buffer, matrix, 0, 0, 0, -w, h, -d, r, g, b);
+
+        line(buffer, matrix, -w, h, -d, 0, h + 0.2f, -d, r, g, b);
+        line(buffer, matrix, w, h, -d, 0, h + 0.2f, -d, r, g, b);
     }
 
     private static void line(VertexConsumer buffer, Matrix4f matrix, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b) {
