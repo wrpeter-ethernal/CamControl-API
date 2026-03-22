@@ -10,6 +10,7 @@ import dev.peter.util.Keyframe;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
@@ -55,6 +56,7 @@ public class CamCommand {
                     )
                     .then(literal("save")
                             .then(argument("name", StringArgumentType.string())
+                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
                                         String name = StringArgumentType.getString(context, "name");
                                         var list = new ArrayList<>(CamControl.getKeyframes());
@@ -71,6 +73,7 @@ public class CamCommand {
                     )
                     .then(literal("delete")
                             .then(argument("name", StringArgumentType.string())
+                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
                                         String name = StringArgumentType.getString(context, "name");
                                         CinematicStorage.delete(context.getSource().getServer(), name);
@@ -141,6 +144,7 @@ public class CamCommand {
                     .then(literal("play")
                             .then(argument("players", EntityArgumentType.players())
                                     .then(argument("name", StringArgumentType.string())
+                                            .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                             .executes(context -> {
                                                 String name = StringArgumentType.getString(context, "name");
                                                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
@@ -160,6 +164,7 @@ public class CamCommand {
                                     })
                             )
                             .then(argument("name", StringArgumentType.string())
+                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
                                         String name = StringArgumentType.getString(context, "name");
                                         var list = CinematicStorage.load(context.getSource().getServer(), name);
