@@ -87,19 +87,19 @@ public class KeyframeRenderer {
     }
 
     private static void renderCameraIndicator(VertexConsumer buffer, Matrix4f matrix, boolean isFirst) {
-        float w = 0.2f, h = 0.15f, d = 0.3f;
+        float w = 0.5f, h = 0.35f, d = 0.7f;
         float r = 1.0f, g = 1.0f, b = 0.0f;
         if (isFirst) g = 0.5f;
 
-        line(buffer, matrix, -w, -h, d, w, -h, d, r, g, b);
-        line(buffer, matrix, w, -h, d, w, h, d, r, g, b);
-        line(buffer, matrix, w, h, d, -w, h, d, r, g, b);
-        line(buffer, matrix, -w, h, d, -w, -h, d, r, g, b);
+        line(buffer, matrix, -w, -h, -d, w, -h, -d, r, g, b);
+        line(buffer, matrix, w, -h, -d, w, h, -d, r, g, b);
+        line(buffer, matrix, w, h, -d, -w, h, -d, r, g, b);
+        line(buffer, matrix, -w, h, -d, -w, -h, -d, r, g, b);
 
-        line(buffer, matrix, 0, 0, 0, -w, -h, d, r, g, b);
-        line(buffer, matrix, 0, 0, 0, w, -h, d, r, g, b);
-        line(buffer, matrix, 0, 0, 0, w, h, d, r, g, b);
-        line(buffer, matrix, 0, 0, 0, -w, h, d, r, g, b);
+        line(buffer, matrix, 0, 0, 0, -w, -h, -d, r, g, b);
+        line(buffer, matrix, 0, 0, 0, w, -h, -d, r, g, b);
+        line(buffer, matrix, 0, 0, 0, w, h, -d, r, g, b);
+        line(buffer, matrix, 0, 0, 0, -w, h, -d, r, g, b);
     }
 
     private static void line(VertexConsumer buffer, Matrix4f matrix, float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b) {
