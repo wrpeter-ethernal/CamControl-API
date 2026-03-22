@@ -67,6 +67,34 @@ public class CinematicStorage {
         }
     }
 
+    public static void saveSession(MinecraftServer server, List<Keyframe> keyframes) {
+        File file = getSessionFile(server);
+        try (FileWriter writer = new FileWriter(file)) {
+            GSON.toJson(keyframes, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<Keyframe> loadSession(MinecraftServer server) {
+        File file = getSessionFile(server);
+        if (!file.exists()) return null;
+        try (FileReader reader = new FileReader(file)) {
+            Type type = new TypeToken<List<Keyframe>>() {}.getType();
+            return GSON.fromJson(reader, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static File getSessionFile(MinecraftServer server) {
+        Path worldDir = server.getSavePath(WorldSavePath.ROOT);
+        File storageDir = new File(worldDir.toFile(), "camcontrol");
+        if (!storageDir.exists()) storageDir.mkdirs();
+        return new File(storageDir, "session.json");
+    }
+
     private static File getStorageFile(MinecraftServer server) {
         Path worldDir = server.getSavePath(WorldSavePath.ROOT);
         File storageDir = new File(worldDir.toFile(), "camcontrol");
