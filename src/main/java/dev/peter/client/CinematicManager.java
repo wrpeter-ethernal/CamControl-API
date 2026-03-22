@@ -49,7 +49,7 @@ public class CinematicManager {
         return active;
     }
 
-    public static CinematicState tick() {
+    public static CinematicState tick(float tickDelta) {
         if (!active || currentPath == null || currentPath.size() < 2) {
             stop();
             return null;
@@ -62,32 +62,32 @@ public class CinematicManager {
             return null;
         }
 
-        return getPathState(elapsed);
+        return getPathState(elapsed, tickDelta);
     }
 
-    private static CinematicState getPathState(float elapsed) {
+    private static CinematicState getPathState(float elapsed, float tickDelta) {
         float accumulated = 0;
         for (int i = 0; i < currentPath.size() - 1; i++) {
             float segmentDuration = currentPath.get(i).duration();
             if (elapsed <= accumulated + segmentDuration) {
                 float localAlpha = (elapsed - accumulated) / segmentDuration;
-                return interpolate(i, localAlpha);
+                return interpolate(i, localAlpha, tickDelta);
             }
             accumulated += segmentDuration;
         }
         return null;
     }
 
-    private static CinematicState interpolate(int index, float alpha) {
+    private static CinematicState interpolate(int index, float alpha, float tickDelta) {
         Keyframe p1 = currentPath.get(index);
         Keyframe p2 = currentPath.get(index + 1);
         Keyframe p0 = index > 0 ? currentPath.get(index - 1) : p1;
         Keyframe p3 = index < currentPath.size() - 2 ? currentPath.get(index + 2) : p2;
 
-        Vec3d v0 = getTruePos(p0);
-        Vec3d v1 = getTruePos(p1);
-        Vec3d v2 = getTruePos(p2);
-        Vec3d v3 = getTruePos(p3);
+        Vec3d v0 = getTruePos(p0, tickDelta);
+        Vec3d v1 = getTruePos(p1, tickDelta);
+        Vec3d v2 = getTruePos(p2, tickDelta);
+        Vec3d v3 = getTruePos(p3, tickDelta);
 
         double x = catmullRom(v0.x, v1.x, v2.x, v3.x, alpha);
         double y = catmullRom(v0.y, v1.y, v2.y, v3.y, alpha);
@@ -111,7 +111,7 @@ public class CinematicManager {
             if (client.world != null) {
                 var target = client.world.getEntityById(p1.targetEntityId());
                 if (target != null) {
-                    Vec3d targetPos = target.getLerpedPos(alpha);
+                    Vec3d targetPos = target.getLerpedPos(tickDelta);
                     double dx = targetPos.x - x;
                     double dy = targetPos.y - y;
                     double dz = targetPos.z - z;
@@ -125,13 +125,13 @@ public class CinematicManager {
         return new CinematicState(x, y, z, yaw, pitch);
     }
 
-    private static Vec3d getTruePos(Keyframe k) {
+    private static Vec3d getTruePos(Keyframe k, float tickDelta) {
         if (k.targetEntityId() != -1 && k.orbital()) {
             var client = net.minecraft.client.MinecraftClient.getInstance();
             if (client.world != null) {
                 var target = client.world.getEntityById(k.targetEntityId());
                 if (target != null) {
-                    return target.getPos().add(k.x(), k.y(), k.z());
+                    return target.getLerpedPos(tickDelta).add(k.x(), k.y(), k.z());
                 }
             }
         }

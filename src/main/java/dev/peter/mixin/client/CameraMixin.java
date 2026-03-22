@@ -20,7 +20,7 @@ public abstract class CameraMixin {
     @Inject(method = "update", at = @At("TAIL"))
     private void overrideCamera(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
         if (CinematicManager.isActive()) {
-            CinematicManager.CinematicState state = CinematicManager.tick();
+            CinematicManager.CinematicState state = CinematicManager.tick(tickDelta);
             if (state != null) {
                 setPos(state.x(), state.y(), state.z());
                 setRotation(state.yaw(), state.pitch());
