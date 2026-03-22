@@ -98,6 +98,14 @@ public class CamCommand {
                                 return 1;
                             })
                     )
+                    .then(literal("clear")
+                            .executes(context -> {
+                                CamControl.clearKeyframes();
+                                CamControl.sync(context.getSource().getServer());
+                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Session keyframes cleared.").formatted(Formatting.YELLOW), true);
+                                return 1;
+                            })
+                    )
                     .then(literal("remove")
                             .then(argument("name", StringArgumentType.string())
                                     .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
