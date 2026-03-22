@@ -30,7 +30,7 @@ public class CamCommand {
                                         ServerPlayerEntity player = context.getSource().getPlayer();
                                         if (player == null) return 0;
                                         float duration = FloatArgumentType.getFloat(context, "duration");
-                                        CamControl.addKeyframe(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch(), duration);
+                                        CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), duration);
                                         context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added at current position with duration: " + duration + "s")
                                                 .formatted(Formatting.AQUA), true);
                                         return 1;
@@ -39,7 +39,7 @@ public class CamCommand {
                             .executes(context -> {
                                 ServerPlayerEntity player = context.getSource().getPlayer();
                                 if (player == null) return 0;
-                                CamControl.addKeyframe(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch(), 5.0f);
+                                CamControl.addKeyframe(player.getX(), player.getEyeY(), player.getZ(), player.getYaw(), player.getPitch(), 5.0f);
                                 context.getSource().sendFeedback(() -> Text.literal("[CamControl] Keyframe added at current position (Default duration: 5s)")
                                         .formatted(Formatting.AQUA), true);
                                 return 1;
