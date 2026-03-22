@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class CameraMixin {
 
     @Shadow protected abstract void setPos(double x, double y, double z);
-    @Shadow protected abstract void setRotation(float yaw, float pitch);
 
     @Inject(method = "update", at = @At("TAIL"))
     private void overrideCamera(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
@@ -23,7 +22,6 @@ public abstract class CameraMixin {
             CinematicManager.CinematicState state = CinematicManager.tick();
             if (state != null) {
                 setPos(state.x(), state.y(), state.z());
-                setRotation(state.yaw(), state.pitch());
             }
         }
     }
