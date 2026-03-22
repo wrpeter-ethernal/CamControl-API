@@ -6,6 +6,9 @@
   "mixins": [
   ],
   "client": [
+    "client.CameraMixin",
+    "client.InGameHudMixin",
+    "client.MouseMixin"
   ],
   "injectors": {
     "defaultRequire": 1
