@@ -1,6 +1,5 @@
 package dev.peter.client;
 
-import dev.peter.network.SetModePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.network.SyncKeyframesPayload;
@@ -22,10 +21,6 @@ public class CamControlClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(SyncKeyframesPayload.ID, (payload, context) -> {
             context.client().execute(() -> CinematicManager.setEditPath(payload.keyframes()));
-        });
-
-        ClientPlayNetworking.registerGlobalReceiver(SetModePayload.ID, (payload, context) -> {
-            context.client().execute(() -> CinematicManager.setIsometric(payload.isometric()));
         });
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {

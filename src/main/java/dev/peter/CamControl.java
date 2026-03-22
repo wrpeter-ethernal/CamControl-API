@@ -1,6 +1,5 @@
 package dev.peter;
 
-import dev.peter.network.SetModePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.network.SyncKeyframesPayload;
@@ -31,7 +30,6 @@ public class CamControl implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(StartCinematicPayload.ID, StartCinematicPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(StopCinematicPayload.ID, StopCinematicPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SyncKeyframesPayload.ID, SyncKeyframesPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(SetModePayload.ID, SetModePayload.CODEC);
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             List<Keyframe> loaded = CinematicStorage.loadSession(server);

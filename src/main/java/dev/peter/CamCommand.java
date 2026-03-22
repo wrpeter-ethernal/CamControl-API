@@ -2,7 +2,6 @@ package dev.peter;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.peter.network.SetModePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.util.CinematicStorage;
@@ -15,7 +14,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,21 +28,6 @@ public class CamCommand {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("cam")
                     .requires(source -> source.hasPermissionLevel(2))
-                    .then(literal("mode")
-                            .then(literal("isometric")
-                                    .then(argument("enabled", BoolArgumentType.bool())
-                                            .executes(context -> {
-                                                boolean enabled = BoolArgumentType.getBool(context, "enabled");
-                                                SetModePayload payload = new SetModePayload(enabled);
-                                                for (ServerPlayerEntity player : context.getSource().getServer().getPlayerManager().getPlayerList()) {
-                                                    ServerPlayNetworking.send(player, payload);
-                                                }
-                                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Isometric mode set to: " + enabled).formatted(Formatting.GREEN), true);
-                                                return 1;
-                                            })
-                                    )
-                            )
-                    )
                     .then(literal("add")
                             .then(argument("duration", FloatArgumentType.floatArg(0.1f))
                                     .executes(context -> {
