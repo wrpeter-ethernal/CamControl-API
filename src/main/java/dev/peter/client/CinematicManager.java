@@ -8,9 +8,18 @@ import java.util.List;
 public class CinematicManager {
 
     private static List<Keyframe> currentPath = null;
+    private static List<Keyframe> editPath = null;
     private static boolean active = false;
     private static long startTime = 0;
     private static float totalDuration = 0;
+
+    public static void setEditPath(List<Keyframe> path) {
+        editPath = path;
+    }
+
+    public static List<Keyframe> getEditPath() {
+        return editPath;
+    }
 
     public static void start(List<Keyframe> path) {
         currentPath = path;
