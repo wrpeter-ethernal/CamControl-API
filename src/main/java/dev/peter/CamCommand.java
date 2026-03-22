@@ -140,21 +140,9 @@ public class CamCommand {
                                         return 1;
                                     })
                             )
-                            .then(argument("name", StringArgumentType.string())
-                                    .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
-                                    .executes(context -> {
-                                        String name = StringArgumentType.getString(context, "name");
-                                        var list = CinematicStorage.load(context.getSource().getServer(), name);
-                                        if (list == null) {
-                                            context.getSource().sendError(Text.literal("[CamControl] Error: Cinematic '" + name + "' not found."));
-                                            return 0;
-                                        }
-                                        playCinematic(context.getSource(), context.getSource().getServer().getPlayerManager().getPlayerList(), list);
-                                        return 1;
-                                    })
-                            )
                             .executes(context -> {
-                                playCinematic(context.getSource(), context.getSource().getServer().getPlayerManager().getPlayerList(), CamControl.getKeyframes());
+                                List<ServerPlayerEntity> players = List.of(context.getSource().getPlayerOrThrow());
+                                playCinematic(context.getSource(), players, CamControl.getKeyframes());
                                 return 1;
                             })
                     )
