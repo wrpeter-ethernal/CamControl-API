@@ -71,8 +71,8 @@ public class CamControl implements ModInitializer {
         ServerPlayNetworking.send(player, payload);
     }
 
-    public static void addKeyframe(double x, double y, double z, float yaw, float pitch, float duration, float shakeI, float shakeS, int targetId, boolean orbital) {
-        keyframes.add(new Keyframe(x, y, z, yaw, pitch, duration, shakeI, shakeS, targetId, orbital));
+    public static void addKeyframe(double x, double y, double z, float yaw, float pitch, float duration, float shakeIntensity, float shakeSpeed, int targetEntityId) {
+        keyframes.add(new Keyframe(x, y, z, yaw, pitch, duration, shakeIntensity, shakeSpeed, targetEntityId));
     }
 
     public static void removeKeyframe(int index) {

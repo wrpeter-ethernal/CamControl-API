@@ -4,30 +4,35 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.util.math.Vec3d;
 
-public record Keyframe(double x, double y, double z, float yaw, float pitch, float duration, float shakeIntensity, float shakeSpeed, int targetEntityId, boolean orbital) {
+public record Keyframe(double x, double y, double z, float yaw, float pitch, float duration, float shakeIntensity, float shakeSpeed, int targetEntityId) {
 
     public static final PacketCodec<RegistryByteBuf, Keyframe> CODEC = new PacketCodec<>() {
         @Override
-        public Keyframe decode(RegistryByteBuf buf) {
-            return new Keyframe(
-                buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                buf.readFloat(), buf.readFloat(), buf.readFloat(),
-                buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readBoolean()
-            );
+        public void encode(RegistryByteBuf buf, Keyframe keyframe) {
+            buf.writeDouble(keyframe.x());
+            buf.writeDouble(keyframe.y());
+            buf.writeDouble(keyframe.z());
+            buf.writeFloat(keyframe.yaw());
+            buf.writeFloat(keyframe.pitch());
+            buf.writeFloat(keyframe.duration());
+            buf.writeFloat(keyframe.shakeIntensity());
+            buf.writeFloat(keyframe.shakeSpeed());
+            buf.writeInt(keyframe.targetEntityId());
         }
 
         @Override
-        public void encode(RegistryByteBuf buf, Keyframe value) {
-            buf.writeDouble(value.x);
-            buf.writeDouble(value.y);
-            buf.writeDouble(value.z);
-            buf.writeFloat(value.yaw);
-            buf.writeFloat(value.pitch);
-            buf.writeFloat(value.duration);
-            buf.writeFloat(value.shakeIntensity);
-            buf.writeFloat(value.shakeSpeed);
-            buf.writeInt(value.targetEntityId);
-            buf.writeBoolean(value.orbital);
+        public Keyframe decode(RegistryByteBuf buf) {
+            return new Keyframe(
+                buf.readDouble(),
+                buf.readDouble(),
+                buf.readDouble(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readInt()
+            );
         }
     };
 

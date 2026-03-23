@@ -185,15 +185,6 @@ public class CinematicManager {
     }
 
     private static Vec3d getTruePos(Keyframe k, float tickDelta) {
-        if (k.targetEntityId() != -1 && k.orbital()) {
-            var client = net.minecraft.client.MinecraftClient.getInstance();
-            if (client.world != null) {
-                var target = client.world.getEntityById(k.targetEntityId());
-                if (target != null) {
-                    return target.getLerpedPos(tickDelta).add(k.x(), k.y(), k.z());
-                }
-            }
-        }
         return k.getPos();
     }
 
