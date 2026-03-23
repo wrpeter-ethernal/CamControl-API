@@ -1,4 +1,6 @@
 # CamControl-API
+![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg?logo=minecraft&logoColor=white)
+![Fabric](https://img.shields.io/badge/Loader-Fabric-lightgrey.svg?logo=fabric)
 
 **CamControl-API** es una API para controlar la cámara en Minecraft (Fabric). Sirve tanto para hacer cinemáticas como para que otros programadores la usen en sus propios mods. Puedes poner puntos en el mapa, añadir efectos de temblor y hacer que la cámara siga a cualquier mob o jugador automáticamente.
 
