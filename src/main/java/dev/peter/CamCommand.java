@@ -187,11 +187,14 @@ public class CamCommand {
                                     .suggests((context, builder) -> CommandSource.suggestMatching(CinematicStorage.getAll(context.getSource().getServer()).keySet(), builder))
                                     .executes(context -> {
                                         String name = StringArgumentType.getString(context, "name");
-                                        CinematicStorage.delete(context.getSource().getServer(), name);
-                                        CamControl.clearKeyframes();
-                                        CamControl.sync(context.getSource().getServer());
-                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic and cleared session: ").formatted(Formatting.RED)
-                                                .append(Text.literal(name).formatted(Formatting.GOLD)), true);
+                                        if (CinematicStorage.delete(context.getSource().getServer(), name)) {
+                                            CamControl.clearKeyframes();
+                                            CamControl.sync(context.getSource().getServer());
+                                            context.getSource().sendFeedback(() -> Text.literal("[CamControl] Removed cinematic and cleared session: ").formatted(Formatting.RED)
+                                                    .append(Text.literal(name).formatted(Formatting.GOLD)), true);
+                                        } else {
+                                            context.getSource().sendError(Text.literal("[CamControl] Cinematic not found: " + name).formatted(Formatting.RED));
+                                        }
                                         return 1;
                                     })
                             )

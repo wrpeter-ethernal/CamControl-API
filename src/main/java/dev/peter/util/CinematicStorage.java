@@ -31,9 +31,12 @@ public class CinematicStorage {
         return savedCinematics.get(name);
     }
 
-    public static void delete(MinecraftServer server, String name) {
-        savedCinematics.remove(name);
-        persist(server);
+    public static boolean delete(MinecraftServer server, String name) {
+        if (savedCinematics.remove(name) != null) {
+            persist(server);
+            return true;
+        }
+        return false;
     }
 
     public static Map<String, List<Keyframe>> getAll(MinecraftServer server) {
