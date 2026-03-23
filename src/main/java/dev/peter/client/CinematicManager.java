@@ -14,8 +14,10 @@ public class CinematicManager {
     private static long startTime = 0;
     private static float totalDuration = 0;
     private static float independentShakeIntensity = 0;
-    private static float independentShakeSpeed = 0;
+    private static float independentShakeSpeed = 0; // Speed is still used for keyframes
     private static long independentShakeEndTime = 0;
+    private static boolean continuousActive = false;
+    private static float continuousIntensity = 0;
     private static float clientTicks = 0;
     private static float seedX = (float) Math.random() * 100f;
     private static float seedY = (float) Math.random() * 100f;
@@ -32,20 +34,39 @@ public class CinematicManager {
         seedY = (float) Math.random() * 100f;
     }
 
+    public static void setContinuousShake(boolean active, float intensity) {
+        continuousActive = active;
+        continuousIntensity = intensity;
+        if (active) {
+            seedX = (float) Math.random() * 100f;
+            seedY = (float) Math.random() * 100f;
+        }
+    }
+
     public static float getShakeYaw(float tickDelta) {
+        float offset = 0;
         if (System.currentTimeMillis() < independentShakeEndTime) {
             float time = (clientTicks + tickDelta) * 0.7f * (independentShakeSpeed / 10f);
-            return (float) (Math.sin(time + seedY) + Math.sin(time * 2.2f + seedY) * 0.5f) * independentShakeIntensity;
+            offset += (float) (Math.sin(time + seedY) + Math.sin(time * 2.2f + seedY) * 0.5f) * independentShakeIntensity;
         }
-        return 0;
+        if (continuousActive) {
+            float time = (clientTicks + tickDelta) * 0.7f;
+            offset += (float) (Math.sin(time + seedY) + Math.sin(time * 2.2f + seedY) * 0.5f) * continuousIntensity;
+        }
+        return offset;
     }
 
     public static float getShakePitch(float tickDelta) {
+        float offset = 0;
         if (System.currentTimeMillis() < independentShakeEndTime) {
             float time = (clientTicks + tickDelta) * 0.8f * (independentShakeSpeed / 10f);
-            return (float) (Math.sin(time + seedX) + Math.sin(time * 2.5f + seedX) * 0.5f) * independentShakeIntensity;
+            offset += (float) (Math.sin(time + seedX) + Math.sin(time * 2.5f + seedX) * 0.5f) * independentShakeIntensity;
         }
-        return 0;
+        if (continuousActive) {
+            float time = (clientTicks + tickDelta) * 0.8f;
+            offset += (float) (Math.sin(time + seedX) + Math.sin(time * 2.5f + seedX) * 0.5f) * continuousIntensity;
+        }
+        return offset;
     }
 
     public static Vec3d getShakeOffset() {

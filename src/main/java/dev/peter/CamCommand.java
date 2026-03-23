@@ -1,6 +1,7 @@
 package dev.peter;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.peter.network.ShakePayload;
 import dev.peter.network.StartCinematicPayload;
@@ -32,23 +33,37 @@ public class CamCommand {
                     .then(literal("effect")
                             .then(literal("shake")
                                     .then(argument("targets", EntityArgumentType.players())
-                                            .then(argument("intensity", FloatArgumentType.floatArg(0))
-                                                    .then(argument("speed", FloatArgumentType.floatArg(0))
-                                                            .then(argument("duration", FloatArgumentType.floatArg(0.1f))
-                                                                    .executes(context -> {
-                                                                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(context, "targets");
-                                                                        float intensity = FloatArgumentType.getFloat(context, "intensity");
-                                                                        float speed = FloatArgumentType.getFloat(context, "speed");
-                                                                        float duration = FloatArgumentType.getFloat(context, "duration");
-                                                                        ShakePayload payload = new ShakePayload(intensity, speed, duration);
-                                                                        for (ServerPlayerEntity player : targets) {
-                                                                            ServerPlayNetworking.send(player, payload);
-                                                                        }
-                                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Started shake for " + targets.size() + " players.").formatted(Formatting.GREEN), true);
-                                                                        return 1;
-                                                                    })
-                                                            )
+                                            .then(literal("start")
+                                                    .then(argument("level", IntegerArgumentType.integer(1, 10))
+                                                            .executes(context -> {
+                                                                Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(context, "targets");
+                                                                int level = IntegerArgumentType.getInteger(context, "level");
+                                                                float intensity = level * 0.15f;
+                                                                for (ServerPlayerEntity player : targets) {
+                                                                    ServerPlayNetworking.send(player, new ShakePayload(true, intensity));
+                                                                }
+                                                                context.getSource().sendFeedback(() -> Text.literal("[CamControl] Shake Level " + level + " started for " + targets.size() + " players.").formatted(Formatting.GREEN), true);
+                                                                return 1;
+                                                            })
                                                     )
+                                                    .executes(context -> {
+                                                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(context, "targets");
+                                                        for (ServerPlayerEntity player : targets) {
+                                                            ServerPlayNetworking.send(player, new ShakePayload(true, 0.15f));
+                                                        }
+                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Shake Level 1 started for " + targets.size() + " players.").formatted(Formatting.GREEN), true);
+                                                        return 1;
+                                                    })
+                                            )
+                                            .then(literal("stop")
+                                                    .executes(context -> {
+                                                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(context, "targets");
+                                                        for (ServerPlayerEntity player : targets) {
+                                                            ServerPlayNetworking.send(player, new ShakePayload(false, 0f));
+                                                        }
+                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Shake stopped for " + targets.size() + " players.").formatted(Formatting.YELLOW), true);
+                                                        return 1;
+                                                    })
                                             )
                                     )
                             )

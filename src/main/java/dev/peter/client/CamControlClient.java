@@ -25,7 +25,7 @@ public class CamControlClient implements ClientModInitializer {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ShakePayload.ID, (payload, context) -> {
-            context.client().execute(() -> CinematicManager.setShake(payload.intensity(), payload.speed(), payload.duration()));
+            context.client().execute(() -> CinematicManager.setContinuousShake(payload.active(), payload.intensity()));
         });
 
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
