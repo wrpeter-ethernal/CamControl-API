@@ -5,6 +5,7 @@ import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.network.SyncKeyframesPayload;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
@@ -28,9 +29,11 @@ public class CamControlClient implements ClientModInitializer {
             context.client().execute(() -> CinematicManager.setContinuousShake(payload.active(), payload.intensity()));
         });
 
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
             CinematicManager.clientTick();
         });
+
+        // test
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
             KeyframeRenderer.render(context);
