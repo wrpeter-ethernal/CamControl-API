@@ -28,6 +28,10 @@ public class CamControlClient implements ClientModInitializer {
             context.client().execute(() -> CinematicManager.setShake(payload.intensity(), payload.speed(), payload.duration()));
         });
 
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            CinematicManager.clientTick();
+        });
+
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
             KeyframeRenderer.render(context);
         });

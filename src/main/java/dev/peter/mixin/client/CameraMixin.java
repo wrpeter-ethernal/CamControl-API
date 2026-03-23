@@ -2,7 +2,6 @@ package dev.peter.mixin.client;
 
 import dev.peter.client.CinematicManager;
 import net.minecraft.client.render.Camera;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,17 +19,18 @@ public abstract class CameraMixin {
 
     @Inject(method = "update", at = @At("TAIL"))
     private void overrideCamera(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
-        Vec3d shake = CinematicManager.getShakeOffset();
+        float shakeYaw = CinematicManager.getShakeYaw(tickDelta);
+        float shakePitch = CinematicManager.getShakePitch(tickDelta);
+        
         if (CinematicManager.isActive()) {
             CinematicManager.CinematicState state = CinematicManager.tick(tickDelta);
             if (state != null) {
-                setPos(state.x() + shake.x, state.y() + shake.y, state.z() + shake.z);
-                setRotation(state.yaw(), state.pitch());
+                setPos(state.x(), state.y(), state.z());
+                setRotation(state.yaw() + shakeYaw, state.pitch() + shakePitch);
             }
-        } else if (!shake.equals(Vec3d.ZERO)) {
+        } else if (shakeYaw != 0 || shakePitch != 0) {
             Camera camera = (Camera) (Object) this;
-            Vec3d pos = camera.getPos();
-            setPos(pos.x + shake.x, pos.y + shake.y, pos.z + shake.z);
+            setRotation(camera.getYaw() + shakeYaw, camera.getPitch() + shakePitch);
         }
     }
 

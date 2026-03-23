@@ -16,23 +16,40 @@ public class CinematicManager {
     private static float independentShakeIntensity = 0;
     private static float independentShakeSpeed = 0;
     private static long independentShakeEndTime = 0;
+    private static float clientTicks = 0;
+    private static float seedX = (float) Math.random() * 100f;
+    private static float seedY = (float) Math.random() * 100f;
+
+    public static void clientTick() {
+        clientTicks++;
+    }
 
     public static void setShake(float intensity, float speed, float duration) {
         independentShakeIntensity = intensity;
         independentShakeSpeed = speed;
         independentShakeEndTime = System.currentTimeMillis() + (long)(duration * 1000);
+        seedX = (float) Math.random() * 100f;
+        seedY = (float) Math.random() * 100f;
+    }
+
+    public static float getShakeYaw(float tickDelta) {
+        if (System.currentTimeMillis() < independentShakeEndTime) {
+            float time = (clientTicks + tickDelta) * 0.7f * (independentShakeSpeed / 10f);
+            return (float) (Math.sin(time + seedY) + Math.sin(time * 2.2f + seedY) * 0.5f) * independentShakeIntensity;
+        }
+        return 0;
+    }
+
+    public static float getShakePitch(float tickDelta) {
+        if (System.currentTimeMillis() < independentShakeEndTime) {
+            float time = (clientTicks + tickDelta) * 0.8f * (independentShakeSpeed / 10f);
+            return (float) (Math.sin(time + seedX) + Math.sin(time * 2.5f + seedX) * 0.5f) * independentShakeIntensity;
+        }
+        return 0;
     }
 
     public static Vec3d getShakeOffset() {
-        if (System.currentTimeMillis() < independentShakeEndTime) {
-            double time = System.currentTimeMillis() / 1000.0 * independentShakeSpeed;
-            return new Vec3d(
-                Math.sin(time) * independentShakeIntensity * 0.1,
-                Math.cos(time * 1.2) * independentShakeIntensity * 0.1,
-                Math.sin(time * 0.7) * independentShakeIntensity * 0.1
-            );
-        }
-        return Vec3d.ZERO;
+        return Vec3d.ZERO; // No longer used for positional shake
     }
 
     public static void setIsometric(boolean value) {
