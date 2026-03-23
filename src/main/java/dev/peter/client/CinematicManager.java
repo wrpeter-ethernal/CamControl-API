@@ -13,6 +13,27 @@ public class CinematicManager {
     private static boolean isometric = false;
     private static long startTime = 0;
     private static float totalDuration = 0;
+    private static float independentShakeIntensity = 0;
+    private static float independentShakeSpeed = 0;
+    private static long independentShakeEndTime = 0;
+
+    public static void setShake(float intensity, float speed, float duration) {
+        independentShakeIntensity = intensity;
+        independentShakeSpeed = speed;
+        independentShakeEndTime = System.currentTimeMillis() + (long)(duration * 1000);
+    }
+
+    public static Vec3d getShakeOffset() {
+        if (System.currentTimeMillis() < independentShakeEndTime) {
+            double time = System.currentTimeMillis() / 1000.0 * independentShakeSpeed;
+            return new Vec3d(
+                Math.sin(time) * independentShakeIntensity * 0.1,
+                Math.cos(time * 1.2) * independentShakeIntensity * 0.1,
+                Math.sin(time * 0.7) * independentShakeIntensity * 0.1
+            );
+        }
+        return Vec3d.ZERO;
+    }
 
     public static void setIsometric(boolean value) {
         isometric = value;

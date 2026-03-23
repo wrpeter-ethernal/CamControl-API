@@ -1,5 +1,6 @@
 package dev.peter;
 
+import dev.peter.network.ShakePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.network.SyncKeyframesPayload;
@@ -20,7 +21,7 @@ import java.util.List;
 public class CamControl implements ModInitializer {
 
     private static final List<Keyframe> keyframes = new ArrayList<>();
- 
+
     public static Identifier id(String path) {
         return Identifier.of("camcontrol", path);
     }
@@ -30,6 +31,7 @@ public class CamControl implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(StartCinematicPayload.ID, StartCinematicPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(StopCinematicPayload.ID, StopCinematicPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SyncKeyframesPayload.ID, SyncKeyframesPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ShakePayload.ID, ShakePayload.CODEC);
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             List<Keyframe> loaded = CinematicStorage.loadSession(server);

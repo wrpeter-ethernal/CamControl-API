@@ -2,6 +2,7 @@ package dev.peter;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.peter.network.ShakePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.util.CinematicStorage;
@@ -28,6 +29,30 @@ public class CamCommand {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(literal("cam")
                     .requires(source -> source.hasPermissionLevel(2))
+                    .then(literal("effect")
+                            .then(literal("shake")
+                                    .then(argument("targets", EntityArgumentType.players())
+                                            .then(argument("intensity", FloatArgumentType.floatArg(0))
+                                                    .then(argument("speed", FloatArgumentType.floatArg(0))
+                                                            .then(argument("duration", FloatArgumentType.floatArg(0.1f))
+                                                                    .executes(context -> {
+                                                                        Collection<ServerPlayerEntity> targets = EntityArgumentType.getPlayers(context, "targets");
+                                                                        float intensity = FloatArgumentType.getFloat(context, "intensity");
+                                                                        float speed = FloatArgumentType.getFloat(context, "speed");
+                                                                        float duration = FloatArgumentType.getFloat(context, "duration");
+                                                                        ShakePayload payload = new ShakePayload(intensity, speed, duration);
+                                                                        for (ServerPlayerEntity player : targets) {
+                                                                            ServerPlayNetworking.send(player, payload);
+                                                                        }
+                                                                        context.getSource().sendFeedback(() -> Text.literal("[CamControl] Started shake for " + targets.size() + " players.").formatted(Formatting.GREEN), true);
+                                                                        return 1;
+                                                                    })
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
                     .then(literal("add")
                             .then(argument("duration", FloatArgumentType.floatArg(0.1f))
                                     .executes(context -> {

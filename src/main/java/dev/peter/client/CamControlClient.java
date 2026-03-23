@@ -1,5 +1,6 @@
 package dev.peter.client;
 
+import dev.peter.network.ShakePayload;
 import dev.peter.network.StartCinematicPayload;
 import dev.peter.network.StopCinematicPayload;
 import dev.peter.network.SyncKeyframesPayload;
@@ -21,6 +22,10 @@ public class CamControlClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(SyncKeyframesPayload.ID, (payload, context) -> {
             context.client().execute(() -> CinematicManager.setEditPath(payload.keyframes()));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(ShakePayload.ID, (payload, context) -> {
+            context.client().execute(() -> CinematicManager.setShake(payload.intensity(), payload.speed(), payload.duration()));
         });
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
